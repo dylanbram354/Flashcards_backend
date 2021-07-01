@@ -42,7 +42,7 @@ class CollectionDetail(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class FlashcardList(APIView):
+class FlashcardsInCollection(APIView):
 
     def get(self, request, fk):
         cards = Flashcard.objects.filter(collection_id=fk)
@@ -55,5 +55,29 @@ class FlashcardList(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ModifyCard(APIView):
+
+    def get_object(self, pk):
+        try:
+            return Flashcard.objects.get(id=pk)
+        except Flashcard.DoesNotExist:
+            raise Http404
+
+    def put(self, request, pk):
+        card = self.get_object(pk)
+        serializer = FlashcardSerializer(card, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        card = self.get_object(pk)
+        serializer = FlashcardSerializer(card)
+        card.delete()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
