@@ -40,3 +40,20 @@ class CollectionDetail(APIView):
         serializer = CollectionSerializer(collection)
         collection.delete()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class FlashcardList(APIView):
+
+    def get(self, request, fk):
+        cards = Flashcard.objects.filter(collection_id=fk)
+        serializer = FlashcardSerializer(cards, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, fk):
+        serializer = FlashcardSerializer(data={**request.data, 'collection': fk})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
